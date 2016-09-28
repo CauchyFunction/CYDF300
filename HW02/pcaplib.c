@@ -103,7 +103,7 @@ void makeARPPacket(u_char* packet, u_char* srcmac, int* srcip, u_char* dstmac, i
 }
 
 void opendevice(pcap_t *pd){
-	char* device = pcap_lookupdev(ebuf);
+	const char* device = pcap_lookupdev(ebuf);
 	if(device == NULL) {puts(ebuf); exit(-1);}
 
 	pd = pcap_open_live(device, 256, 0, -1, ebuf);
@@ -119,6 +119,7 @@ void sendFakePacket(int* vct, int* gtw){ // victim ip, gateway ip
 	u_char mymac[6], vmac[6];
 	int atk[4];
 	struct ether_addr *eth;
+	pcap_t *pd;
 
 	printf("Gateway IP : %d.%d.%d.%d\n", gtw[0], gtw[1], gtw[2], gtw[3]);
 	getMyMAC(mymac);
@@ -127,7 +128,6 @@ void sendFakePacket(int* vct, int* gtw){ // victim ip, gateway ip
 	getMyIP(atk);
 	printf("Attacker IP : %d.%d.%d.%d\n", atk[0], atk[1], atk[2], atk[3]);
 
-	pcap_t *pd;
 	opendevice(pd);
 
 	makeARPPacket(pkt1, mymac, atk, NULL, vct);
