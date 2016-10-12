@@ -1,8 +1,11 @@
 // netsession.h
 #pragma once
-#include <pcap.h>
 #include <exception>
 #include <string>
+#include <tins/tins.h>
+#include <vector>
+
+using namespace Tins;
 
 class NetException: public std::exception {
 public:
@@ -13,53 +16,35 @@ private:
 	std::string msg;
 };
 
-namespace Netpkt {
-	struct Ether {
-		Ether(){}
-	};
-
-	struct IP {
-		IP(){}
-	};
-
-	struct TCP {
-		TCP(){}
-	};
-
-	struct UDP {
-		UDP(){}
-	};
-
-	struct ARP {
-		ARP(){}
-	};
-
-	struct Packet {
-		u_char* packet;
-		unsigned int size;
-
-		Packet(){}
-		Packet(Ether eth){}
-		Packet(Ether eth, IP ip){}
-		Packet(Ether eth, ARP arp){}
-	};
-}
-
 namespace Netssn {
 	bool execute_shell(char* shell, char* res, int size);
-	bool get_gateway_IP(Netpkt::IP ip);
+	bool get_gateway_IP(std::string& oip, std::string& tip);
+	bool get_my_config(std::string oip, std::string& ip, std::string& mac);
+	bool convert_ip2mac(std::string ip, std::string& mac);
 
 	struct Session {
 	private:
-		pcap_t *mySession;
+		Sniffer* mySession;
+		std::string myDevice;
+		std::string myIP, myMAC, gtIP, gtMAC, vtIP, vtMAC;
 	public:
 		Session(){}
+		Session(const unsigned packet_size);
+		Session(const char* device, const unsigned packet_size);
 		~Session(){}
-		void open_session();
-		void open_session(const char* device);
-//		void send_packet(const char* packet, unsigned int size);
-//		void send_packet(pkt::Packet packet);
-//		void catch_packet();
+		void set_config(std::string myIP_, std::string myMAC_,
+				std::string gtIP_, std::string gtMAC_,
+				std::string vtIP_, std::string vtMAC_){
+			myIP = myIP_, myMAC = myMAC_;
+			gtIP = gtIP_, gtMAC = gtMAC_;
+			vtIP = vtIP_, vtMAC = vtMAC_;
+		}
+		void catch_packet(Packet &pkt);
+		void catch_packet(std::vector<Packet> &pktvec,
+				unsigned int size);
+		void send_infection();
+		bool is_recover_packet(Packet pkt);
+		unsigned relay_packet(Packet pkt);
 //		void close_session();
 	};
 }
