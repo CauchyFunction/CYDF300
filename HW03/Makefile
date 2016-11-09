@@ -2,7 +2,7 @@
 all : arp_spoofing
 
 arp_spoofing : arp_spoofing.o netsession.o
-	g++ -o arp_spoofing arp_spoofing.o netsession.o -lpcap
+	g++ -o arp_spoofing arp_spoofing.o netsession.o -lpcap -ltins
 
 arp_spoofing.o : netsession.h arp_spoofing.cpp
 
