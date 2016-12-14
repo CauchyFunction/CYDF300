@@ -1,3 +1,5 @@
+# Original Source by Luu Gia Thuy (https://github.com/luugiathuy/WebProxyPython/)
+
 import os, sys, socket, json;
 import _thread as thread;
 
