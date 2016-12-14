@@ -1,0 +1,13 @@
+{
+	"ip": "127.0.0.1",
+	"port": 8080,
+	"blacklist": ["naver.com"],
+	"encoding": "euc-kr",
+	"replaceWord": [
+		{ "from": "hacking", "to": "ABCDEFG" },
+		{ "from": "Michael", "to": "GILBERT" },
+		{ "from": "fun", "to": "KILLING JOKES"},
+		{ "from": "ioi", "to": "choi yu jeong"}
+	],
+	"cacheList": [".gif", ".jpg", ".png", ".ico", ".zip"]
+}
